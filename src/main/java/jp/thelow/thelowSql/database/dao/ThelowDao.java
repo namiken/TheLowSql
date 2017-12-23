@@ -17,6 +17,7 @@ import jp.thelow.thelowSql.exception.UnchekedSqlException;
 import jp.thelow.thelowSql.util.CommonUtil;
 import jp.thelow.thelowSql.util.QueryBuilder;
 import jp.thelow.thelowSql.util.SqlLogger;
+import lombok.Setter;
 
 public class ThelowDao<T> {
 
@@ -28,10 +29,10 @@ public class ThelowDao<T> {
 
   QueryRunner qr = new QueryRunner();
 
+  @Setter
   private Connection con;
 
-  public ThelowDao(Connection connection, Class<T> clazz) {
-    this.con = connection;
+  public ThelowDao(Class<T> clazz) {
     this.clazz = clazz;
     queryBuilder = new QueryBuilder(clazz);
   }

@@ -3,7 +3,6 @@ package jp.thelow.thelowSql.database.logic;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.List;
 
 import org.bukkit.Bukkit;
 
@@ -16,6 +15,8 @@ import jp.thelow.thelowSql.database.dao.ThelowDao;
 import net.md_5.bungee.api.ChatColor;
 
 public class DataBaseExecutor<T> extends Thread {
+
+  private static final int TIMEOUT = 30 * 1000;
 
   private DataBaseDataStore<T> dataBaseDataStore;
   private Connection connect;
@@ -47,29 +48,62 @@ public class DataBaseExecutor<T> extends Thread {
 
   @Override
   public void run() {
-    if (connect != null) {
-      ThelowDao<T> thelowDao = new ThelowDao<>(connect, dataBaseDataStore.getClazz());
+    // 実行中がチェックする
+    if (!Main.isProcessing) { throw new IllegalStateException("プラグインが実行中ではありません。"); }
 
-      List<DataBaseRunner<T, ?>> nextTaskList = dataBaseDataStore.getNextTaskList();
-      for (DataBaseRunner<T, ?> dataBaseRunner : nextTaskList) {
-        dataBaseRunner.accept(thelowDao);
-      }
-    }
+    Connection connection = null;
 
-    if (dataBaseDataStore.getTaskCount() != 0 && connect != null) {
-      run();
-      return;
-    }
+    ThelowDao<T> thelowDao = new ThelowDao<>(dataBaseDataStore.getClazz());
 
-    if (connect != null) {
+    while (true) {
       try {
-        connect.close();
-      } catch (SQLException e) {
+        DataBaseRunner<T, ?> nextTask = dataBaseDataStore.getNextTask();
+        // タスクが存在する場合
+        if (nextTask != null) {
+          // DBと接続を行う
+          if (connection == null || connection.isClosed()) {
+            connection = connect();
+          }
+          // コネクションを最新のものに置き換える
+          thelowDao.setCon(connection);
+          // タスクを実行する
+          nextTask.accept(thelowDao);
+        } else {
+          // 指定時間以上立った場合はクローズする
+          if (connection != null && !connection.isClosed()) {
+            connection.close();
+            connection = null;
+          }
+
+          // プラグインが実行中でないなら何もしない
+          if (!Main.isProcessing) {
+            break;
+          }
+        }
+
+      } catch (InterruptedException e) {
+        // 起こり得ない
         e.printStackTrace();
-        // 一旦無視
-      } finally {
-        connect = null;
+      } catch (SQLException e) {
+        // 接続失敗
+        e.printStackTrace();
+        // 30秒スレッドを停止させる
+        waitThread();
+      } catch (Exception e) {
+        e.printStackTrace();
       }
+    }
+
+  }
+
+  /**
+   * スレッドを停止する
+   */
+  private void waitThread() {
+    try {
+      Thread.currentThread().wait(TIMEOUT);
+    } catch (InterruptedException e1) {
+      e1.printStackTrace();
     }
   }
 

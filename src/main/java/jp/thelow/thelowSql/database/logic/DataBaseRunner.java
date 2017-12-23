@@ -17,6 +17,9 @@ public class DataBaseRunner<T, X> implements Consumer<ThelowDao<T>> {
 
   private Consumer<X> callback;
 
+  /** セレクト文実行ならTRUE */
+  private boolean isSelect;
+
   @Override
   public void accept(ThelowDao<T> dao) {
     try {
