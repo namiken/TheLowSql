@@ -1,0 +1,8 @@
+name: TheLow Sql
+main: jp.thelow.thelowSql.Main
+version: 1.0
+commands:
+   test_connect:
+     description: データベースにテスト接続します.
+     permission: jp.thelow.sql.test_connect
+     permission-message: You don't have <permission>
