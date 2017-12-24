@@ -75,7 +75,7 @@ public class DataBaseExecutor<T> extends Thread {
             connection = null;
           }
 
-          // プラグインが実行中でないなら何もしない
+          // プラグインが実行中でないなら終了する
           if (!Main.isProcessing) {
             break;
           }

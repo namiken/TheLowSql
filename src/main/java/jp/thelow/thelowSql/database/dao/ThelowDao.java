@@ -146,10 +146,10 @@ public class ThelowDao<T> {
 
     for (T t : entity) {
       try {
-        int updateInsert = qr.update(con, sql, CommonUtil.joinArray(queryBuilder.params(t), queryBuilder.params(t)));
         SqlLogger.info(
-            "execute update insert:" + queryBuilder.getDataBaseInfo().getTableName() + ", params:"
+            "execute update insert:" + sql + "\r\n ・params:"
                 + Arrays.toString(CommonUtil.joinArray(queryBuilder.params(t), queryBuilder.params(t))));
+        int updateInsert = qr.update(con, sql, CommonUtil.joinArray(queryBuilder.params(t), queryBuilder.params(t)));
 
         if (updateInsert != 0) {
           updatedList.add(t);
@@ -173,10 +173,10 @@ public class ThelowDao<T> {
     String sql = queryBuilder.getUpdateInsert();
 
     try {
-      qr.update(con, sql, CommonUtil.joinArray(queryBuilder.params(entity), queryBuilder.params(entity)));
       SqlLogger.info(
-          "execute update insert:" + sql + ", params:"
+          "execute update insert:" + sql + "\r\n ・params:"
               + Arrays.toString(CommonUtil.joinArray(queryBuilder.params(entity), queryBuilder.params(entity))));
+      qr.update(con, sql, CommonUtil.joinArray(queryBuilder.params(entity), queryBuilder.params(entity)));
     } catch (Exception e) {
       e.printStackTrace();
     }

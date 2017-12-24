@@ -125,7 +125,7 @@ public class QueryBuilder {
    * @return
    */
   public String getUpdateInsert() {
-    if (cacheUpdateInsertQuery != null) { return cacheInsertQuery; }
+    if (cacheUpdateInsertQuery != null) { return cacheUpdateInsertQuery; }
 
     StringBuilder query = new StringBuilder();
 
