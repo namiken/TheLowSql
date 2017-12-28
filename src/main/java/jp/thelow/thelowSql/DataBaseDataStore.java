@@ -2,7 +2,6 @@ package jp.thelow.thelowSql;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -13,9 +12,6 @@ import lombok.Getter;
 
 public class DataBaseDataStore<T> implements DataStore<T> {
 
-  static ForkJoinPool forkJoinPool = new ForkJoinPool();
-
-  /** 実行するタスク */
   private DataBaseExecutor<T> thread;
 
   /** Entityの型 */
@@ -33,7 +29,7 @@ public class DataBaseDataStore<T> implements DataStore<T> {
   DataBaseDataStore(Class<T> clazz) {
     this.clazz = clazz;
     thread = new DataBaseExecutor<>(this);
-    forkJoinPool.invoke(thread);
+    thread.start();
   }
 
   @Override
