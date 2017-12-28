@@ -3,6 +3,7 @@ package jp.thelow.thelowSql.database.logic;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.concurrent.RecursiveAction;
 
 import org.bukkit.Bukkit;
 
@@ -14,7 +15,9 @@ import jp.thelow.thelowSql.ThelowSqlConfig;
 import jp.thelow.thelowSql.database.dao.ThelowDao;
 import net.md_5.bungee.api.ChatColor;
 
-public class DataBaseExecutor<T> extends Thread {
+public class DataBaseExecutor<T> extends RecursiveAction {
+
+  private static final long serialVersionUID = 9064850810793506214L;
 
   private static final int TIMEOUT = 30 * 1000;
 
@@ -47,7 +50,7 @@ public class DataBaseExecutor<T> extends Thread {
   }
 
   @Override
-  public void run() {
+  public void compute() {
     // 実行中がチェックする
     if (!Main.processing.get()) { throw new IllegalStateException("プラグインが実行中ではありません。"); }
 
@@ -110,4 +113,5 @@ public class DataBaseExecutor<T> extends Thread {
   public boolean isDead() {
     return connect == null;
   }
+
 }
