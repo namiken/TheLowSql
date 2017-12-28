@@ -1,5 +1,7 @@
 package jp.thelow.thelowSql;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.bukkit.plugin.java.JavaPlugin;
 
 import jp.thelow.thelowSql.command.TestConnection;
@@ -11,11 +13,10 @@ public class Main extends JavaPlugin {
   public static ThelowSqlConfig config = null;
 
   /** プラグインが動いていたらTRUE */
-  public static boolean isProcessing = true;
+  public static final AtomicBoolean processing = new AtomicBoolean(true);
 
   @Override
   public void onEnable() {
-    isProcessing = true;
     plugin = this;
 
     this.getConfig().options().copyDefaults(true);
@@ -24,12 +25,13 @@ public class Main extends JavaPlugin {
     config.load(getConfig());
 
     getCommand("test_connect").setExecutor(new TestConnection());
+    processing.set(true);
   }
 
   @Override
   public void onDisable() {
     super.onDisable();
-    isProcessing = false;
+    processing.set(false);
   }
 
   public static JavaPlugin getPlugin() {

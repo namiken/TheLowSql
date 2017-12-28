@@ -142,7 +142,7 @@ public class QueryBuilder {
 
     cacheUpdateInsertQuery = query.toString();
 
-    return query.toString();
+    return cacheUpdateInsertQuery;
   }
 
   /**

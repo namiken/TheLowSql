@@ -49,7 +49,7 @@ public class DataBaseExecutor<T> extends Thread {
   @Override
   public void run() {
     // 実行中がチェックする
-    if (!Main.isProcessing) { throw new IllegalStateException("プラグインが実行中ではありません。"); }
+    if (!Main.processing.get()) { throw new IllegalStateException("プラグインが実行中ではありません。"); }
 
     Connection connection = null;
 
@@ -76,7 +76,7 @@ public class DataBaseExecutor<T> extends Thread {
           }
 
           // プラグインが実行中でないなら終了する
-          if (!Main.isProcessing) {
+          if (!Main.processing.get()) {
             break;
           }
         }
