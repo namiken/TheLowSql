@@ -3,14 +3,12 @@ package jp.thelow.thelowSql.database.test;
 import jp.thelow.thelowSql.annotation.Column;
 import jp.thelow.thelowSql.annotation.Id;
 import jp.thelow.thelowSql.annotation.Table;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * プレイヤー情報を保存するためのEntity。
  */
-@Getter
-@Setter
+@Data
 @Table("PLAYER_DATA")
 public class TestEntity {
 

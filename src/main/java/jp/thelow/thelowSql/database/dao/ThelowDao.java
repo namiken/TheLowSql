@@ -1,8 +1,6 @@
 package jp.thelow.thelowSql.database.dao;
 
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,53 +11,49 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 
+import jp.thelow.thelowSql.database.ConnectionFactory;
 import jp.thelow.thelowSql.exception.UnchekedSqlException;
 import jp.thelow.thelowSql.util.CommonUtil;
 import jp.thelow.thelowSql.util.QueryBuilder;
 import jp.thelow.thelowSql.util.SqlLogger;
-import lombok.Setter;
 
-public class ThelowDao<T> {
+public class ThelowDao {
 
   private static final BasicRowProcessor CONVERT = new BasicRowProcessor(new GenerousBeanProcessor());
 
-  private Class<T> clazz;
+  private Class<?> clazz;
 
   QueryBuilder queryBuilder;
 
   QueryRunner qr = new QueryRunner();
 
-  @Setter
-  private Connection con;
-
-  public ThelowDao(Class<T> clazz) {
+  public ThelowDao(Class<?> clazz) {
     this.clazz = clazz;
     queryBuilder = new QueryBuilder(clazz);
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  public T selectOne(String whereQuery, Object[] params) {
+  public <T> T selectOne(String whereQuery, Object[] params) {
     try {
       ResultSetHandler<T> handler = new BeanHandler(clazz, CONVERT);
       String sql = queryBuilder.getSelect() + whereQuery;
 
       SqlLogger.info("execute select:" + sql);
-      return qr.query(con, sql, handler, params);
-
+      return qr.query(ConnectionFactory.getSafeConnection(), sql, handler, params);
     } catch (SQLException e) {
       throw new UnchekedSqlException(e);
     }
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  public List<T> selectList(String whereQuery, Object[] params) {
+  public <T> List<T> selectList(String whereQuery, Object[] params) {
     try {
       ResultSetHandler<T> handler = new BeanListHandler(clazz, CONVERT);
 
       String sql = queryBuilder.getSelect() + whereQuery;
       SqlLogger
           .info("execute select list:" + sql + ", params:" + Arrays.toString(params));
-      return (List<T>) qr.query(con, sql, handler, params);
+      return (List<T>) qr.query(ConnectionFactory.getSafeConnection(), sql, handler, params);
     } catch (SQLException e) {
       throw new UnchekedSqlException(e);
     }
@@ -73,12 +67,13 @@ public class ThelowDao<T> {
    * @param whereQuery where句
    * @param whereParam whereに用いるパラメータ
    * @return 更新件数
+   * @throws SQLException
    */
   public int update(String updateQuery, Object[] setParam, String whereQuery, Object[] whereParam) {
     try {
       String sql = updateQuery + " " + whereQuery;
       SqlLogger.info("execute update:" + sql);
-      return qr.update(con, sql, CommonUtil.joinArray(setParam, whereParam));
+      return qr.update(ConnectionFactory.getSafeConnection(), sql, CommonUtil.joinArray(setParam, whereParam));
     } catch (SQLException e) {
       throw new UnchekedSqlException(e);
     }
@@ -87,21 +82,19 @@ public class ThelowDao<T> {
   /**
    * Entityの内容をすべて更新を行う
    *
+   * @param <T>
+   *
    * @param entity entity
    * @param whereQuery where句
    * @param whereParam where句に用いてるパラメータ
    * @return
+   * @throws SQLException
    */
-  public T updateAll(T entity, String whereQuery, Object[] whereParam) {
+  public <T> int updateAll(T entity, String whereQuery, Object[] whereParam) {
     try {
       String sql = queryBuilder.updateQuery() + " " + whereQuery;
       SqlLogger.info("execute update all:" + sql);
-      int update = qr.update(con, sql, CommonUtil.joinArray(queryBuilder.params(entity), whereParam));
-      if (update == 0) {
-        return null;
-      } else {
-        return entity;
-      }
+      return qr.update(ConnectionFactory.getSafeConnection(), sql, CommonUtil.joinArray(queryBuilder.params(entity), whereParam));
     } catch (SQLException e) {
       throw new UnchekedSqlException(e);
     }
@@ -114,22 +107,49 @@ public class ThelowDao<T> {
    * @param whereQuery where句
    * @param whereParam where句に用いてるパラメータ
    * @return
+   * @throws SQLException
    */
-  public T insertAll(T entity) {
+  public <T> int insertAll(T entity) {
     try {
       String sql = queryBuilder.insertQuery();
       SqlLogger.info("execute insert:" + queryBuilder.getDataBaseInfo().getTableName());
-      int insert = qr.update(con, sql, queryBuilder.params(entity));
-      if (insert == 0) {
-        return null;
-      } else {
-        return entity;
-      }
+      return qr.update(ConnectionFactory.getSafeConnection(), sql, queryBuilder.params(entity));
     } catch (SQLException e) {
       throw new UnchekedSqlException(e);
     }
   }
 
+  // /**
+  // * Entityの内容をupdateInsertする
+  // *
+  // * @param entity entity
+  // * @param whereQuery where句
+  // * @param whereParam where句に用いてるパラメータ
+  // * @return
+  // */
+  // public <T> int updateInsert(List<T> entity) {
+  // String sql = queryBuilder.getUpdateInsert();
+  //
+  // // 更新されたデータ
+  // List<T> updatedList = new ArrayList<>();
+  //
+  // for (T t : entity) {
+  // try {
+  // SqlLogger.info(
+  // "execute update insert:" + sql + "\r\n ・params:"
+  // + Arrays.toString(CommonUtil.joinArray(queryBuilder.params(t), queryBuilder.params(t))));
+  // int updateInsert = qr.update(con, sql, CommonUtil.joinArray(queryBuilder.params(t), queryBuilder.params(t)));
+  //
+  // if (updateInsert != 0) {
+  // updatedList.add(t);
+  // }
+  // } catch (SQLException e) {
+  // throw new UnchekedSqlException(e);
+  // }
+  // }
+  // return updatedList;
+  // }
+
   /**
    * Entityの内容をupdateInsertする
    *
@@ -138,48 +158,16 @@ public class ThelowDao<T> {
    * @param whereParam where句に用いてるパラメータ
    * @return
    */
-  public List<T> updateInsert(List<T> entity) {
-    String sql = queryBuilder.getUpdateInsert();
-
-    // 更新されたデータ
-    List<T> updatedList = new ArrayList<>();
-
-    for (T t : entity) {
-      try {
-        SqlLogger.info(
-            "execute update insert:" + sql + "\r\n ・params:"
-                + Arrays.toString(CommonUtil.joinArray(queryBuilder.params(t), queryBuilder.params(t))));
-        int updateInsert = qr.update(con, sql, CommonUtil.joinArray(queryBuilder.params(t), queryBuilder.params(t)));
-
-        if (updateInsert != 0) {
-          updatedList.add(t);
-        }
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-    return updatedList;
-  }
-
-  /**
-   * Entityの内容をupdateInsertする
-   *
-   * @param entity entity
-   * @param whereQuery where句
-   * @param whereParam where句に用いてるパラメータ
-   * @return
-   */
-  public T updateInsert(T entity) {
+  public <T> int updateInsert(T entity) {
     String sql = queryBuilder.getUpdateInsert();
 
     try {
       SqlLogger.info(
           "execute update insert:" + sql + "\r\n ・params:"
               + Arrays.toString(CommonUtil.joinArray(queryBuilder.params(entity), queryBuilder.params(entity))));
-      qr.update(con, sql, CommonUtil.joinArray(queryBuilder.params(entity), queryBuilder.params(entity)));
-    } catch (Exception e) {
-      e.printStackTrace();
+      return qr.update(ConnectionFactory.getSafeConnection(), sql, CommonUtil.joinArray(queryBuilder.params(entity), queryBuilder.params(entity)));
+    } catch (SQLException e) {
+      throw new UnchekedSqlException(e);
     }
-    return entity;
   }
 }

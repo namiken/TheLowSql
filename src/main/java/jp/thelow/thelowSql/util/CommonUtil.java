@@ -1,6 +1,12 @@
 package jp.thelow.thelowSql.util;
 
+import org.bukkit.Bukkit;
+
+import jp.thelow.thelowSql.Main;
+
 public class CommonUtil {
+
+  public static boolean onServer = true;
 
   /**
    *
@@ -19,5 +25,21 @@ public class CommonUtil {
     System.arraycopy(array2, 0, newArray, array1.length, array2.length);
 
     return newArray;
+  }
+
+  /**
+   * メインスレッドでrunnerを実行する。
+   *
+   * @param runner 実行対象
+   */
+  public static void callSyncMethod(Runnable runner) {
+    if (onServer) {
+      Bukkit.getScheduler().callSyncMethod(Main.getPlugin(), () -> {
+        runner.run();
+        return null;
+      });
+    } else {
+      runner.run();
+    }
   }
 }
