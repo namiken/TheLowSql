@@ -14,9 +14,9 @@ public class ThelowSqlConfig {
   private String password;
 
   public void load(FileConfiguration config) {
-    url = "jdbc:mysql://" + config.getString("database.host") + ":" + config.getString("database.port") + "/" + config.getString("database.database");
+    url = "jdbc:mysql://" + config.getString("database.host") + ":" + config.getString("database.port") + "/" +
+        config.getString("database.database");
     user = config.getString("database.user");
     password = config.getString("database.password");
   }
-
 }

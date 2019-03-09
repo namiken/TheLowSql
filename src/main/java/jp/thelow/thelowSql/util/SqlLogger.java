@@ -5,6 +5,8 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 
+import jp.thelow.thelowSql.Main;
+
 /**
  * TheLowSqlの大部分で使用されるロガーです。
  *
@@ -95,7 +97,10 @@ public final class SqlLogger {
    * @param message 文字列のメッセージ
    */
   public static void info(String message) {
-    log(message, LogLevel.INFO);
+    boolean isDebug = Main.getPlugin() == null ? false : Main.getPlugin().getConfig().getBoolean("debug");
+    if (isDebug) {
+      log(message, LogLevel.INFO);
+    }
   }
 
   /**

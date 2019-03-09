@@ -1,4 +1,4 @@
-name: TheLow Sql
+name: TheLowSql
 main: jp.thelow.thelowSql.Main
 version: 1.0
 commands:

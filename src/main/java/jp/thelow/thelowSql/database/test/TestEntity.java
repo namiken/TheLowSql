@@ -18,7 +18,7 @@ public class TestEntity {
 
   @Id("DATA_TYPE")
   @Column("DATA_TYPE")
-  private String dataType = "dataA";
+  private String dataType;
 
   /** 剣レベル */
   @Column("SWORD_LEVEL")
@@ -48,16 +48,28 @@ public class TestEntity {
   @Column("MONEY")
   private int money;
 
-  /** 剣の転生IDリスト */
-  @Column("SWORD_REINC_KEYLIST")
-  private String swordReincKeyList;
+  /** banID */
+  @Column("BAN_ID")
+  private String banId;
 
-  /** 弓の転生IDリスト */
-  @Column("BOW_REINC_KEYLIST")
-  private String bowReincKeyList;
+  /** ユニット */
+  @Column("UNIT")
+  private int unit;
 
-  /** 魔法の転生IDリスト */
-  @Column("MAGIC_REINC_KEYLIST")
-  private String magicReincKeyList;
+  /** 剣の転生回数 */
+  @Column("SWORD_REINC_COUNT")
+  private int swordReincCount;
+
+  /** 弓の転生回数 */
+  @Column("BOW_REINC_COUNT")
+  private int bowReincCount;
+
+  /** 魔法の転生回数 */
+  @Column("MAGIC_REINC_COUNT")
+  private int magicReincCount;
+
+  /** 取得パークリスト */
+  @Column("PARK_KEYLIST")
+  private String parkKeylist;
 
 }

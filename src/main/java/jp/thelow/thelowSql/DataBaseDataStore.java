@@ -6,10 +6,12 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 import jp.thelow.thelowSql.database.dao.ThelowDao;
 import jp.thelow.thelowSql.database.logic.DataBaseExecutor;
 import jp.thelow.thelowSql.database.logic.DataBaseRunnable;
+import jp.thelow.thelowSql.database.logic.ExecuteUpdateRunner;
 import jp.thelow.thelowSql.database.logic.SelectRunner;
 import jp.thelow.thelowSql.database.logic.UpdateListRunner;
 import jp.thelow.thelowSql.database.logic.UpdateRunner;
@@ -31,7 +33,8 @@ public class DataBaseDataStore<T> implements DataStore<T> {
   private ThelowDao thelowDao;
 
   /** タスクを示すキュー */
-  private static BlockingQueue<DataBaseRunnable> taskQueue = new PriorityBlockingQueue<>(20, (t1, t2) -> t1.isSelect() ? 1 : -1);
+  private static BlockingQueue<DataBaseRunnable> taskQueue = new PriorityBlockingQueue<>(20,
+      (t1, t2) -> t1.isSelect() ? 1 : -1);
 
   DataBaseDataStore(Class<T> clazz) {
     thelowDao = new ThelowDao(clazz);
@@ -88,6 +91,12 @@ public class DataBaseDataStore<T> implements DataStore<T> {
   @Override
   public void updateInsert(T bean, Consumer<UpdateResult<T>> consumer) {
     addTask(new UpdateRunner<>(() -> thelowDao.updateInsert(bean), consumer, bean));
+  }
+
+  @Override
+  public void execute(String query, Object[] params, IntConsumer callback) {
+    addTask(new ExecuteUpdateRunner(() -> thelowDao.executeUpdate(query, params), callback));
+
   }
 
 }

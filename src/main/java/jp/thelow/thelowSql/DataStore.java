@@ -2,6 +2,7 @@ package jp.thelow.thelowSql;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 import jp.thelow.thelowSql.database.result.SelectResult;
 import jp.thelow.thelowSql.database.result.UpdateResult;
@@ -62,4 +63,11 @@ public interface DataStore<T> {
    */
   void updateInsert(T bean, Consumer<UpdateResult<T>> consumer);
 
+  /**
+   * SQLを実行する。
+   *
+   * @param whereQuery
+   * @param params TODO
+   */
+  void execute(String query, Object[] params, IntConsumer callback);
 }

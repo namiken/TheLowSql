@@ -24,6 +24,9 @@ public class Main extends JavaPlugin {
     config = new ThelowSqlConfig();
     config.load(getConfig());
 
+    getConfig().options().copyDefaults(true);
+    saveDefaultConfig();
+
     getCommand("test_connect").setExecutor(new TestConnection());
     processing.set(true);
   }

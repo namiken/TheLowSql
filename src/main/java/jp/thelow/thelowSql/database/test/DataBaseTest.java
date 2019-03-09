@@ -19,15 +19,16 @@ public class DataBaseTest {
 
     CommonUtil.onServer = false;
 
-    // selectTest();
+    updateTest();
+    selectTest();
     // insertTest();
-    // updateTest();
     Main.processing.set(false);
   }
 
   public static void insertTest() {
     TestEntity testEntity = new TestEntity();
     testEntity.setUuid("326d0cd6-408b-4135-82a3-f2bd00248189");
+    testEntity.setDataType("dataA");
 
     DataStore<TestEntity> dataStore = DataStoreFactory.getDataStore(TestEntity.class);
     dataStore.insert(testEntity, a -> {
@@ -41,10 +42,11 @@ public class DataBaseTest {
     testEntity.setUuid("67d7d0a0-2e5a-498c-b74b-ea72e0b10b3d");
     testEntity.setBowExp(100);
     testEntity.setBowLevel(100);
-    testEntity.setBowReincKeyList("1,2");
+    testEntity.setUnit(100);
+    testEntity.setDataType("dataA");
 
     DataStore<TestEntity> dataStore = DataStoreFactory.getDataStore(TestEntity.class);
-    dataStore.update(testEntity, " uuid = a?", new Object[] { "67d7d0a0-2e5a-498c-b74b-ea72e0b10b3d" }, a -> {
+    dataStore.update(testEntity, " uuid = ?  and data_type=?", new Object[] { "67d7d0a0-2e5a-498c-b74b-ea72e0b10b3d", "dataA" }, a -> {
       System.out.println(a.getCount());
       System.out.println(a.getErrorInstance());
     });
@@ -53,7 +55,7 @@ public class DataBaseTest {
   public static void selectTest() {
 
     DataStore<TestEntity> dataStore = DataStoreFactory.getDataStore(TestEntity.class);
-    dataStore.getOneData(" uuid = ?", new Object[] { "01730d92-b140-4089-a980-deb75bad519b" }, a -> {
+    dataStore.getOneData(" uuid = ? and data_type=?", new Object[] { "67d7d0a0-2e5a-498c-b74b-ea72e0b10b3d", "dataA" }, a -> {
       System.out.println(a.isError());
       System.out.println(a.getErrorInstance());
       System.out.println(a.getResult());

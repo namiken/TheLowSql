@@ -94,7 +94,8 @@ public class ThelowDao {
     try {
       String sql = queryBuilder.updateQuery() + " " + whereQuery;
       SqlLogger.info("execute update all:" + sql);
-      return qr.update(ConnectionFactory.getSafeConnection(), sql, CommonUtil.joinArray(queryBuilder.params(entity), whereParam));
+      return qr.update(ConnectionFactory.getSafeConnection(), sql,
+          CommonUtil.joinArray(queryBuilder.params(entity), whereParam));
     } catch (SQLException e) {
       throw new UnchekedSqlException(e);
     }
@@ -119,37 +120,6 @@ public class ThelowDao {
     }
   }
 
-  // /**
-  // * Entityの内容をupdateInsertする
-  // *
-  // * @param entity entity
-  // * @param whereQuery where句
-  // * @param whereParam where句に用いてるパラメータ
-  // * @return
-  // */
-  // public <T> int updateInsert(List<T> entity) {
-  // String sql = queryBuilder.getUpdateInsert();
-  //
-  // // 更新されたデータ
-  // List<T> updatedList = new ArrayList<>();
-  //
-  // for (T t : entity) {
-  // try {
-  // SqlLogger.info(
-  // "execute update insert:" + sql + "\r\n ・params:"
-  // + Arrays.toString(CommonUtil.joinArray(queryBuilder.params(t), queryBuilder.params(t))));
-  // int updateInsert = qr.update(con, sql, CommonUtil.joinArray(queryBuilder.params(t), queryBuilder.params(t)));
-  //
-  // if (updateInsert != 0) {
-  // updatedList.add(t);
-  // }
-  // } catch (SQLException e) {
-  // throw new UnchekedSqlException(e);
-  // }
-  // }
-  // return updatedList;
-  // }
-
   /**
    * Entityの内容をupdateInsertする
    *
@@ -165,7 +135,24 @@ public class ThelowDao {
       SqlLogger.info(
           "execute update insert:" + sql + "\r\n ・params:"
               + Arrays.toString(CommonUtil.joinArray(queryBuilder.params(entity), queryBuilder.params(entity))));
-      return qr.update(ConnectionFactory.getSafeConnection(), sql, CommonUtil.joinArray(queryBuilder.params(entity), queryBuilder.params(entity)));
+      return qr.update(ConnectionFactory.getSafeConnection(), sql,
+          CommonUtil.joinArray(queryBuilder.params(entity), queryBuilder.params(entity)));
+    } catch (SQLException e) {
+      throw new UnchekedSqlException(e);
+    }
+  }
+
+  /**
+   * 1つのSQLを実行する。
+   *
+   * @param query
+   * @param params
+   * @return
+   */
+  public int executeUpdate(String query, Object[] params) {
+    try {
+      SqlLogger.info("execute query:" + query + "\r\n ・params:" + Arrays.toString(params));
+      return qr.update(ConnectionFactory.getSafeConnection(), query, params);
     } catch (SQLException e) {
       throw new UnchekedSqlException(e);
     }
