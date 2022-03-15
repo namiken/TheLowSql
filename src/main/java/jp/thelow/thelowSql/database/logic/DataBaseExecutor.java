@@ -2,23 +2,22 @@ package jp.thelow.thelowSql.database.logic;
 
 import java.sql.SQLException;
 
-import jp.thelow.thelowSql.DataBaseDataStore;
 import jp.thelow.thelowSql.Main;
 import jp.thelow.thelowSql.database.ConnectionFactory;
+import lombok.Setter;
 
 public class DataBaseExecutor extends Thread {
 
   private static final int TIMEOUT = 30 * 1000;
+  private CustomSupplier supplier;
 
-  // private Connection connect;
+  @Setter
+  private boolean isStop;
+  private String tableName;
 
-  public DataBaseExecutor() {
-    // try {
-    // connect = connect();
-    // } catch (SQLException e) {
-    // e.printStackTrace();
-    // Bukkit.broadcastMessage(ChatColor.RED + "データーベースとの接続に失敗しました。現在ステータスの保存は行われません。");
-    // }
+  public DataBaseExecutor(String tableName, CustomSupplier supplier) {
+    this.tableName = tableName;
+    this.supplier = supplier;
   }
 
   @Override
@@ -27,24 +26,23 @@ public class DataBaseExecutor extends Thread {
     if (!Main.processing.get()) { throw new IllegalStateException("プラグインが実行中ではありません。"); }
 
     while (true) {
+      if (isStop) {
+        Main.getPlugin().getLogger().info("Threadを終了します。:" + tableName);
+        break;
+      }
+
       try {
-        DataBaseRunnable nextTask = DataBaseDataStore.getNextTask();
+        DataBaseRunnable nextTask = supplier.getNextTask();
         if (nextTask != null) {
           // タスクを実行する
           nextTask.run();
         } else {
           // コネクションを切断する
           ConnectionFactory.safeClose();
-
-          // プラグインが実行中でないなら終了する
-          if (!Main.processing.get()) {
-            break;
-          }
         }
 
       } catch (InterruptedException e) {
-        // 起こり得ない
-        e.printStackTrace();
+        //何もしない
       } catch (SQLException e) {
         // 接続失敗
         e.printStackTrace();
@@ -68,4 +66,7 @@ public class DataBaseExecutor extends Thread {
     }
   }
 
+  public interface CustomSupplier {
+    DataBaseRunnable getNextTask() throws InterruptedException, SQLException;
+  }
 }

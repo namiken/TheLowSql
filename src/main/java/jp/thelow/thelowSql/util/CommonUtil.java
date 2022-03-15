@@ -35,8 +35,13 @@ public class CommonUtil {
   public static void callSyncMethod(Runnable runner) {
     if (onServer) {
       Bukkit.getScheduler().callSyncMethod(Main.getPlugin(), () -> {
-        runner.run();
-        return null;
+        try {
+          runner.run();
+          return null;
+        } catch (Throwable e) {
+          e.printStackTrace();
+          throw e;
+        }
       });
     } else {
       runner.run();

@@ -35,6 +35,39 @@ public class Main extends JavaPlugin {
   public void onDisable() {
     super.onDisable();
     processing.set(false);
+
+    getLogger().info("SQLタスクの完了を待ちます。");
+    int count = 0;
+    while (true) {
+      long taskCount = DataBaseDataStore.getTaskCount();
+      if (taskCount == 0) {
+        getLogger().info("すべてのSQLタスクが完了しました。");
+        break;
+      }
+
+      if (count % 1000 == 0) {
+        getLogger().info("タスクの終了待ちです。:" + DataBaseDataStore.getTaskStatus() + ", 合計:" + taskCount);
+      }
+
+      if (count > 5000) {
+        getLogger().info("一部のSQLタスクが完了しませんでした。:" + DataBaseDataStore.getTaskStatus());
+        break;
+      }
+
+      try {
+        Thread.sleep(50);
+        count += 50;
+      } catch (InterruptedException e) {
+        //何もしない
+        break;
+      }
+    }
+
+    getLogger().info("すべてのスレッドを停止します:" + DataBaseDataStore.threadList.size());
+    DataBaseDataStore.threadList.forEach((k, v) -> {
+      v.interrupt();
+      v.setStop(true);
+    });
   }
 
   public static JavaPlugin getPlugin() {
